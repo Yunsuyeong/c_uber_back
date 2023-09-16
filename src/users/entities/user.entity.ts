@@ -1,8 +1,22 @@
-import { Field, InputType, ObjectType } from '@nestjs/graphql';
+import {
+  Field,
+  InputType,
+  ObjectType,
+  registerEnumType,
+} from '@nestjs/graphql';
 import { CoreEntity } from 'src/common/entities/core.entity';
-import { Column, Entity } from 'typeorm';
+import { BeforeInsert, Column, Entity } from 'typeorm';
+import * as bcrypt from 'bcrypt';
+import { InternalServerErrorException } from '@nestjs/common';
+import { IsEmail, IsEnum } from 'class-validator';
 
-type IUserRone = 'client' | 'owner' | 'delivery';
+enum UserRole {
+  Client,
+  Owner,
+  Delivery,
+}
+
+registerEnumType(UserRole, { name: 'UserRole' });
 
 @InputType({ isAbstract: true })
 @ObjectType()
@@ -10,13 +24,35 @@ type IUserRone = 'client' | 'owner' | 'delivery';
 export class User extends CoreEntity {
   @Column()
   @Field(() => String)
+  @IsEmail()
   email: string;
 
   @Column()
   @Field(() => String)
   password: string;
 
-  @Column()
-  @Field(() => String)
-  role: IUserRone;
+  @Column({ type: 'enum', enum: UserRole })
+  @Field(() => UserRole)
+  @IsEnum(UserRole)
+  role: UserRole;
+
+  @BeforeInsert()
+  async hashedPassword(): Promise<void> {
+    try {
+      this.password = await bcrypt.hash(this.password, 10);
+    } catch (e) {
+      console.log(e);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async checkPassword(aPassword: string): Promise<boolean> {
+    try {
+      const isSame = await bcrypt.compare(aPassword, this.password);
+      return isSame;
+    } catch (e) {
+      console.log(e);
+      throw new InternalServerErrorException();
+    }
+  }
 }
