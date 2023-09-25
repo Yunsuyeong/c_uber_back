@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CONFIG_OPTIONS } from 'src/common/common.constants';
 import { IEmailVar, IMailModuleOptions } from './mail.interfaces';
-import got from 'got';
 import formData from 'form-data';
 import Mailgun from 'mailgun.js';
 
@@ -10,30 +9,27 @@ export class MailService {
   constructor(
     @Inject(CONFIG_OPTIONS) private readonly options: IMailModuleOptions,
   ) {}
-  private async sendEmail(
-    subject: string,
-    template: string,
-    emailVars: IEmailVar[],
-  ) {
+  async sendEmail(subject: string, template: string, emailVars: IEmailVar[]) {
     const mailgun = new Mailgun(formData);
     const client = mailgun.client({
       username: 'CUber',
       key: this.options.apiKey,
     });
+
     const messageData = {
       from: `ysy from CUber <mailgun@${this.options.domain}>`,
       to: 'vanquishr12@gmail.com',
       subject: subject,
       template: template,
-      username: 'test',
-      code: 'abcd123',
+      key: emailVars.forEach((eVar) => eVar.key),
+      value: emailVars.forEach((eVar) => eVar.value),
     };
-
-    const response = await client.messages.create(
-      this.options.domain,
-      messageData,
-    );
-    console.log('response', response);
+    try {
+      await client.messages.create(this.options.domain, messageData);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   sendVerificationEmail(email: string, code: string) {
