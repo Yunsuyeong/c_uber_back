@@ -1,4 +1,4 @@
-import { Args, Query, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Query, Mutation, Resolver, Subscription } from '@nestjs/graphql';
 import { AuthUser } from 'src/auth/auth-user.decorator';
 import { Role } from 'src/auth/role.decorator';
 import { CreateDishOutput } from 'src/restaurants/dto/create-dish.dto';
@@ -9,6 +9,9 @@ import { Order } from './entities/order.entity';
 import { OrderService } from './orders.service';
 import { GetOrderInput, GetOrderOutput } from './dto/get-order.dto';
 import { EditOrderInput, EditOrderOutput } from './dto/edit-order.dto';
+import { PubSub } from 'graphql-subscriptions';
+
+const pubsub = new PubSub();
 
 @Resolver(() => Order)
 export class OrderResolver {

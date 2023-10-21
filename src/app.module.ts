@@ -5,7 +5,7 @@ import {
   RequestMethod,
 } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
-import { ApolloDriver } from '@nestjs/apollo';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
@@ -23,13 +23,30 @@ import { Dish } from './restaurants/entities/dish.entity';
 import { OrdersModule } from './orders/orders.module';
 import { Order } from './orders/entities/order.entity';
 import { OrderItem } from './orders/entities/order-item.entity';
+import { Context } from 'apollo-server-core';
 
 @Module({
   imports: [
-    GraphQLModule.forRoot({
+    GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
-      context: ({ req }) => ({ user: req['user'] }),
+      subscriptions: {
+        'graphql-ws': {
+          onConnect: (context: Context<any>) => {
+            const { connectionParams, extra } = context;
+            extra.token = connectionParams['x-jwt'];
+          },
+        },
+      },
+      context: ({ req, extra }) => {
+        if (extra) {
+          return { token: extra.token };
+        } else {
+          return { token: req.headers['x-jwt'] };
+        }
+      },
+      introspection: true,
+      playground: process.env.NODE_ENV !== 'production',
     }),
     ConfigModule.forRoot({
       isGlobal: true,
