@@ -24,6 +24,7 @@ import { OrdersModule } from './orders/orders.module';
 import { Order } from './orders/entities/order.entity';
 import { OrderItem } from './orders/entities/order-item.entity';
 import { Context } from 'apollo-server-core';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -97,6 +98,7 @@ import { Context } from 'apollo-server-core';
     }),
     RestaurantsModule,
     OrdersModule,
+    CommonModule,
   ],
   controllers: [],
   providers: [],
