@@ -25,6 +25,9 @@ import { Order } from './orders/entities/order.entity';
 import { OrderItem } from './orders/entities/order-item.entity';
 import { Context } from 'apollo-server-core';
 import { CommonModule } from './common/common.module';
+import { PaymentsModule } from './payments/payments.module';
+import { Payment } from './payments/entities/payment.entity';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -84,9 +87,11 @@ import { CommonModule } from './common/common.module';
         Dish,
         Order,
         OrderItem,
+        Payment,
       ],
     }),
     UsersModule,
+    ScheduleModule.forRoot(),
     JwtModule.forRoot({
       privateKey: process.env.TOKEN_KEY,
     }),
@@ -99,6 +104,7 @@ import { CommonModule } from './common/common.module';
     RestaurantsModule,
     OrdersModule,
     CommonModule,
+    PaymentsModule,
   ],
   controllers: [],
   providers: [],
