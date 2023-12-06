@@ -27,7 +27,7 @@ export class OrderResolver {
     @Inject(PUB_SUB) private readonly pubSub: PubSub,
   ) {}
 
-  @Mutation(() => CreateDishOutput)
+  @Mutation(() => CreateOrderOutput)
   async createOrder(
     @AuthUser() user: User,
     @Args('input') createOrderInput: CreateOrderInput,

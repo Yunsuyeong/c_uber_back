@@ -61,7 +61,7 @@ export class OrderService {
             error: 'Dish Not Found',
           };
         }
-        let dishFinalPrice = dish.price;
+        let dishFinalPrice = parseInt(dish.price);
         for (const itemOption of item.options) {
           const dishOption = dish.options.find(
             (dishOption) => dishOption.name === itemOption.name,
@@ -70,7 +70,7 @@ export class OrderService {
             if (dishOption.extra) {
               dishFinalPrice = dishFinalPrice + dishOption.extra;
             } else {
-              const dishOptionChoice = dishOption.choices.find(
+              const dishOptionChoice = dishOption.choices?.find(
                 (optionChoice) => optionChoice.name === itemOption.choice,
               );
               if (dishOptionChoice) {
@@ -103,6 +103,7 @@ export class OrderService {
       });
       return {
         ok: true,
+        orderId: order.id,
       };
     } catch (error) {
       return {

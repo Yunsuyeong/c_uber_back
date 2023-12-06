@@ -29,6 +29,8 @@ import { CreateDishInput, CreateDishOutput } from './dto/create-dish.dto';
 import { Dish } from './entities/dish.entity';
 import { EditDishInput, EditDishOutput } from './dto/edit-dish.dto';
 import { DeleteDishInput, DeleteDishOutput } from './dto/delete-dish.dto';
+import { MyRestaurantsOutput } from './dto/my-restaurants.dto';
+import { MyRestaurantInput, MyRestaurantOutput } from './dto/my-restaurant.dto';
 
 @Injectable()
 export class RestaurantService {
@@ -71,6 +73,49 @@ export class RestaurantService {
       await this.restaurants.save(newRestaurant);
       return {
         ok: true,
+        restaurantId: newRestaurant.id,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error,
+      };
+    }
+  }
+
+  async myRestaurants(owner: User): Promise<MyRestaurantsOutput> {
+    try {
+      const restaurants = await this.restaurants.find({
+        where: {
+          owner: {
+            id: owner.id,
+          },
+        },
+      });
+      return {
+        ok: true,
+        restaurants,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error,
+      };
+    }
+  }
+
+  async myRestaurant(
+    owner: User,
+    { id }: MyRestaurantInput,
+  ): Promise<MyRestaurantOutput> {
+    try {
+      const restaurant = await this.restaurants.findOne({
+        where: { owner: { id: owner.id }, id: id },
+        relations: ['menu', 'orders'],
+      });
+      return {
+        ok: true,
+        restaurant,
       };
     } catch (error) {
       return {
@@ -208,6 +253,7 @@ export class RestaurantService {
         restaurants,
         category,
         totalPages: Math.ceil(totalResults / 25),
+        totalResults,
       };
     } catch (error) {
       return {
@@ -220,8 +266,8 @@ export class RestaurantService {
   async allRestaurants({ page }: RestaurantsInput): Promise<RestaurantsOutput> {
     try {
       const [restaurants, totalResults] = await this.restaurants.findAndCount({
-        take: 25,
-        skip: (page - 1) * 25,
+        take: 3,
+        skip: (page - 1) * 3,
         order: {
           name: 'ASC',
           isPromoted: 'DESC',
@@ -230,7 +276,7 @@ export class RestaurantService {
       return {
         ok: true,
         results: restaurants,
-        totalPages: Math.ceil(totalResults / 25),
+        totalPages: Math.ceil(totalResults / 3),
         totalResults,
       };
     } catch (error) {
