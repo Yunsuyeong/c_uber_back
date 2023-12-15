@@ -6,6 +6,10 @@ import { JwtMiddleware } from './jwt/jwt.middleware';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
+  app.enableCors({
+    origin: true,
+    credentials: true,
+  });
   // app.use(JwtMiddleware);
   await app.listen(4000);
 }

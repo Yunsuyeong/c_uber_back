@@ -39,16 +39,14 @@ import { UploadsModule } from './uploads/uploads.module';
         'graphql-ws': {
           onConnect: (context: Context<any>) => {
             const { connectionParams, extra } = context;
-            extra.token = connectionParams['x-jwt'];
+            return (extra.token = connectionParams['x-jwt']);
           },
         },
       },
       context: ({ req, extra }) => {
-        if (extra) {
-          return { token: extra.token };
-        } else {
-          return { token: req.headers['x-jwt'] };
-        }
+        return {
+          token: extra ? extra.token : req.headers['x-jwt'],
+        };
       },
       introspection: true,
       playground: process.env.NODE_ENV !== 'production',
